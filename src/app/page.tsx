@@ -4,30 +4,42 @@ export const metadata = {
   description: "Reproduce tu recuerdo con el sello Frame2Life",
 };
 
-// ✅ Fuerza runtime Node (evita fallos 500 en Edge) y eval dinámica
+// Fuerza runtime Node y evita caché estática
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type RawParams = { [key: string]: string | string[] | undefined };
 const first = (v?: string | string[]) => (Array.isArray(v) ? v[0] ?? "" : v ?? "");
 
+// decode seguro (no lanza)
+const safeDecode = (s: string) => {
+  try { return decodeURIComponent(s); } catch { return s; }
+};
+
 export default function DisplayPage({ searchParams }: { searchParams?: RawParams }) {
   const videoId = first(searchParams?.v).replace(/[<>]/g, "").trim();
-  const title = decodeURIComponent(first(searchParams?.title) || "Tu recuerdo, tu historia");
-  const coverUrl = decodeURIComponent(first(searchParams?.cover) || "");
+  const title = (() => {
+    const raw = first(searchParams?.title).trim();
+    return raw ? safeDecode(raw) : "Tu recuerdo, tu historia";
+  })();
+  const coverUrl = (() => {
+    const raw = first(searchParams?.cover).trim();
+    return raw ? safeDecode(raw) : "";
+  })();
 
   if (!videoId) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6 text-center">
         <img src="/brand/logo.svg" alt="Frame2Life" className="h-24 w-auto mb-6" />
         <h1 className="text-3xl font-semibold mb-4">Falta el vídeo</h1>
-        <p className="opacity-80">Añade el parámetro <code>?v=&lt;UID&gt;</code> en la URL.</p>
+        <p className="opacity-80">Añade <code>?v=&lt;UID&gt;</code> en la URL.</p>
         <p className="opacity-70 mt-2 text-sm">Ej.: <code>/v?v=abcd1234&title=Mi%20vídeo</code></p>
       </main>
     );
   }
 
-  const iframeSrc = `https://iframe.videodelivery.net/${videoId}` +
+  const iframeSrc =
+    `https://iframe.videodelivery.net/${videoId}` +
     (coverUrl ? `?poster=${encodeURIComponent(coverUrl)}` : "");
 
   return (
