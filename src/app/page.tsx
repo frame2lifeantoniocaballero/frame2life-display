@@ -1,37 +1,49 @@
-'use client';
+// src/app/v/page.tsx
 
-import { useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+export const metadata = {
+  title: "Frame2Life • Play",
+  description: "Reproduce tu recuerdo con el sello Frame2Life",
+};
 
-export default function DisplayPage() {
-  const sp = useSearchParams();
+// Fuerza ejecución en Node y evita cacheo estático
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-  // Lee y limpia parámetros del query en el cliente
-  const { videoId, title, coverUrl } = useMemo(() => {
-    const v = (sp.get('v') || '').replace(/[<>]/g, '').trim();
-    const t = sp.get('title') || '';
-    const c = sp.get('cover') || '';
-    return {
-      videoId: v,
-      title: t ? safeDecode(t) : 'Tu recuerdo, tu historia',
-      coverUrl: c ? safeDecode(c) : '',
-    };
-  }, [sp]);
+type Q = string | string[] | undefined;
+const first = (v: Q) => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
+
+export default function DisplayPage({
+  searchParams,
+}: {
+  searchParams?: Record<string, Q>;
+}) {
+  // Lee parámetros del query desde el servidor (sin hooks)
+  const videoId = first(searchParams?.v).replace(/[<>]/g, "").trim();
+  const rawTitle = first(searchParams?.title).trim();
+  const rawCover = first(searchParams?.cover).trim();
+
+  // No usamos decodeURIComponent para evitar errores en SSR
+  const title = rawTitle || "Tu recuerdo, tu historia";
+  const coverUrl = rawCover || "";
 
   if (!videoId) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6 text-center">
         <img src="/brand/logo.svg" alt="Frame2Life" className="h-24 w-auto mb-6" />
         <h1 className="text-3xl font-semibold mb-4">Falta el vídeo</h1>
-        <p className="opacity-80">Añade <code>?v=&lt;UID&gt;</code> en la URL.</p>
-        <p className="opacity-70 mt-2 text-sm">Ej.: <code>/v?v=abcd1234&title=Mi%20vídeo</code></p>
+        <p className="opacity-80">
+          Añade el parámetro <code>?v=&lt;UID&gt;</code> en la URL.
+        </p>
+        <p className="opacity-70 mt-2 text-sm">
+          Ej.: <code>/v?v=abcd1234&title=Mi%20vídeo</code>
+        </p>
       </main>
     );
   }
 
   const iframeSrc =
     `https://iframe.videodelivery.net/${videoId}` +
-    (coverUrl ? `?poster=${encodeURIComponent(coverUrl)}` : '');
+    (coverUrl ? `?poster=${encodeURIComponent(coverUrl)}` : "");
 
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
@@ -48,11 +60,9 @@ export default function DisplayPage() {
         />
       </div>
 
-      <p className="mt-8 text-xs opacity-60">© {new Date().getFullYear()} Frame2Life</p>
+      <p className="mt-8 text-xs opacity-60">
+        © {new Date().getFullYear()} Frame2Life
+      </p>
     </main>
   );
-}
-
-function safeDecode(s: string) {
-  try { return decodeURIComponent(s); } catch { return s; }
 }
