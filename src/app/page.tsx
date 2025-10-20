@@ -1,31 +1,22 @@
-// src/app/v/page.tsx
-export const metadata = {
-  title: "Frame2Life • Play",
-  description: "Reproduce tu recuerdo con el sello Frame2Life",
-};
+'use client';
 
-// Fuerza runtime Node y evita caché estática
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import { useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
 
-type RawParams = { [key: string]: string | string[] | undefined };
-const first = (v?: string | string[]) => (Array.isArray(v) ? v[0] ?? "" : v ?? "");
+export default function DisplayPage() {
+  const sp = useSearchParams();
 
-// decode seguro (no lanza)
-const safeDecode = (s: string) => {
-  try { return decodeURIComponent(s); } catch { return s; }
-};
-
-export default function DisplayPage({ searchParams }: { searchParams?: RawParams }) {
-  const videoId = first(searchParams?.v).replace(/[<>]/g, "").trim();
-  const title = (() => {
-    const raw = first(searchParams?.title).trim();
-    return raw ? safeDecode(raw) : "Tu recuerdo, tu historia";
-  })();
-  const coverUrl = (() => {
-    const raw = first(searchParams?.cover).trim();
-    return raw ? safeDecode(raw) : "";
-  })();
+  // Lee y limpia parámetros del query en el cliente
+  const { videoId, title, coverUrl } = useMemo(() => {
+    const v = (sp.get('v') || '').replace(/[<>]/g, '').trim();
+    const t = sp.get('title') || '';
+    const c = sp.get('cover') || '';
+    return {
+      videoId: v,
+      title: t ? safeDecode(t) : 'Tu recuerdo, tu historia',
+      coverUrl: c ? safeDecode(c) : '',
+    };
+  }, [sp]);
 
   if (!videoId) {
     return (
@@ -40,7 +31,7 @@ export default function DisplayPage({ searchParams }: { searchParams?: RawParams
 
   const iframeSrc =
     `https://iframe.videodelivery.net/${videoId}` +
-    (coverUrl ? `?poster=${encodeURIComponent(coverUrl)}` : "");
+    (coverUrl ? `?poster=${encodeURIComponent(coverUrl)}` : '');
 
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
@@ -60,4 +51,8 @@ export default function DisplayPage({ searchParams }: { searchParams?: RawParams
       <p className="mt-8 text-xs opacity-60">© {new Date().getFullYear()} Frame2Life</p>
     </main>
   );
+}
+
+function safeDecode(s: string) {
+  try { return decodeURIComponent(s); } catch { return s; }
 }
