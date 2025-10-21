@@ -1,11 +1,10 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-
-export default function VideoPage() {
-  const searchParams = useSearchParams();
-  const videoId = searchParams.get("v");
-  const message = searchParams.get("m") || "Tu recuerdo, tu historia.";
+export default function VideoPage({
+  searchParams,
+}: {
+  searchParams: { v?: string; m?: string };
+}) {
+  const videoId = searchParams.v;
+  const message = searchParams.m ?? "Tu recuerdo, tu historia.";
 
   if (!videoId) {
     return (
@@ -49,27 +48,14 @@ export default function VideoPage() {
       {/* Mensaje personalizado */}
       <h2 style={{ fontSize: "1.1rem", fontWeight: 500 }}>{message}</h2>
 
-      {/* Reproductor del video */}
-      <div
-        style={{
-          width: "90%",
-          maxWidth: 400,
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-      >
-        <video
-          controls
-          playsInline
-          preload="metadata"
-          style={{ width: "100%", borderRadius: 12 }}
-        >
+      {/* Video */}
+      <div style={{ width: "90%", maxWidth: 400, borderRadius: 12, overflow: "hidden" }}>
+        <video controls playsInline preload="metadata" style={{ width: "100%", borderRadius: 12 }}>
           <source src={videoUrl} type="video/mp4" />
           Tu navegador no soporta el video.
         </video>
       </div>
 
-      {/* Footer */}
       <p style={{ fontSize: "0.8rem", color: "#aaa", marginTop: "1rem" }}>
         © 2025 Frame2Life · Todos los derechos reservados
       </p>
