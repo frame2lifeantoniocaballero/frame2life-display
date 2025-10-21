@@ -1,67 +1,80 @@
-// src/app/v/page.tsx
+"use client";
 
-export const metadata = {
-  title: "Frame2Life • Play",
-  description: "Reproduce tu recuerdo con el sello Frame2Life",
-};
+import { useSearchParams } from "next/navigation";
 
-// Fuerza ejecución en Node y evita cacheo estático
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export default function VideoPage() {
+  const searchParams = useSearchParams();
 
-type Q = string | string[] | undefined;
-const first = (v: Q) => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
-
-export default function DisplayPage({
-  searchParams,
-}: {
-  searchParams?: Record<string, Q>;
-}) {
-  // Lee parámetros del query desde el servidor (sin hooks)
-  const videoId = first(searchParams?.v).replace(/[<>]/g, "").trim();
-  const rawTitle = first(searchParams?.title).trim();
-  const rawCover = first(searchParams?.cover).trim();
-
-  // No usamos decodeURIComponent para evitar errores en SSR
-  const title = rawTitle || "Tu recuerdo, tu historia";
-  const coverUrl = rawCover || "";
+  // v = ID del video en ArDrive (TxID)
+  const videoId = searchParams.get("v");
+  // m = mensaje personalizado
+  const message = searchParams.get("m") || "Tu recuerdo, tu historia.";
 
   if (!videoId) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6 text-center">
-        <img src="/brand/logo.svg" alt="Frame2Life" className="h-24 w-auto mb-6" />
-        <h1 className="text-3xl font-semibold mb-4">Falta el vídeo</h1>
-        <p className="opacity-80">
-          Añade el parámetro <code>?v=&lt;UID&gt;</code> en la URL.
-        </p>
-        <p className="opacity-70 mt-2 text-sm">
-          Ej.: <code>/v?v=abcd1234&title=Mi%20vídeo</code>
-        </p>
+      <main
+        style={{
+          display: "grid",
+          placeItems: "center",
+          minHeight: "100vh",
+          backgroundColor: "#000",
+          color: "#fff",
+        }}
+      >
+        <p>Falta el parámetro "v" con el ID del video.</p>
       </main>
     );
   }
 
-  const iframeSrc =
-    `https://iframe.videodelivery.net/${videoId}` +
-    (coverUrl ? `?poster=${encodeURIComponent(coverUrl)}` : "");
+  const videoUrl = `https://arweave.net/${videoId}`;
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-      <img src="/brand/logo.svg" alt="Frame2Life" className="h-24 w-auto mb-6" />
-      <h1 className="text-2xl font-semibold mb-4">{title}</h1>
+    <main
+      style={{
+        backgroundColor: "#000",
+        color: "#fff",
+        textAlign: "center",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "1rem",
+      }}
+    >
+      {/* Logo */}
+      <img
+        src="/logo-frame2life.png"
+        alt="Frame2Life"
+        style={{ width: 150, marginBottom: "0.5rem" }}
+      />
 
-      <div className="w-full max-w-3xl aspect-video rounded-2xl overflow-hidden shadow-2xl">
-        <iframe
-          src={iframeSrc}
-          allow="accelerometer; autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-          className="w-full h-full"
-          title={title}
-        />
+      {/* Mensaje personalizado */}
+      <h2 style={{ fontSize: "1.1rem", fontWeight: 500 }}>{message}</h2>
+
+      {/* Reproductor del video */}
+      <div
+        style={{
+          width: "90%",
+          maxWidth: 400,
+          borderRadius: 12,
+          overflow: "hidden",
+        }}
+      >
+        <video
+          controls
+          playsInline
+          preload="metadata"
+          style={{ width: "100%", borderRadius: 12 }}
+        >
+          <source src={videoUrl} type="video/mp4" />
+          Tu navegador no soporta el video.
+        </video>
       </div>
 
-      <p className="mt-8 text-xs opacity-60">
-        © {new Date().getFullYear()} Frame2Life
+      {/* Footer */}
+      <p style={{ fontSize: "0.8rem", color: "#aaa", marginTop: "1rem" }}>
+        © 2025 Frame2Life • Todos los derechos reservados
       </p>
     </main>
   );
