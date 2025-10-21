@@ -4,10 +4,7 @@ import { useSearchParams } from "next/navigation";
 
 export default function VideoPage() {
   const searchParams = useSearchParams();
-
-  // v = ID del video en ArDrive (TxID)
   const videoId = searchParams.get("v");
-  // m = mensaje personalizado
   const message = searchParams.get("m") || "Tu recuerdo, tu historia.";
 
   if (!videoId) {
@@ -21,7 +18,7 @@ export default function VideoPage() {
           color: "#fff",
         }}
       >
-        <p>Falta el parámetro "v" con el ID del video.</p>
+        <p>Falta el parámetro “v” con el ID del video.</p>
       </main>
     );
   }
@@ -74,7 +71,7 @@ export default function VideoPage() {
 
       {/* Footer */}
       <p style={{ fontSize: "0.8rem", color: "#aaa", marginTop: "1rem" }}>
-        © 2025 Frame2Life • Todos los derechos reservados
+        © 2025 Frame2Life · Todos los derechos reservados
       </p>
     </main>
   );
