@@ -2,6 +2,9 @@
 
 import { useSearchParams } from "next/navigation";
 
+// 🚀 Desactivar prerendering
+export const dynamic = "force-dynamic";
+
 export default function VideoPage() {
   const searchParams = useSearchParams();
   const videoId = searchParams.get("v");
