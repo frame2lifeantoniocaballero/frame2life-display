@@ -1,10 +1,11 @@
-export default function VideoPage({
-  searchParams,
-}: {
-  searchParams: { v?: string; m?: string };
-}) {
-  const videoId = searchParams.v;
-  const message = searchParams.m ?? "Tu recuerdo, tu historia.";
+"use client";
+
+import { useSearchParams } from "next/navigation";
+
+export default function VideoPage() {
+  const searchParams = useSearchParams();
+  const videoId = searchParams.get("v");
+  const message = searchParams.get("m") ?? "Tu recuerdo, tu historia.";
 
   if (!videoId) {
     return (
@@ -22,7 +23,6 @@ export default function VideoPage({
     );
   }
 
-  // ⚠️ Aquí apuntamos a ArDrive / Arweave, no a Cloudflare
   const videoUrl = `https://arweave.net/${videoId}`;
 
   return (
@@ -39,17 +39,14 @@ export default function VideoPage({
         gap: "1rem",
       }}
     >
-      {/* Logo */}
       <img
-        src="/logo-frame2life.png"
+        src="/logo-frame2life.svg"
         alt="Frame2Life"
         style={{ width: 150, marginBottom: "0.5rem" }}
       />
 
-      {/* Mensaje personalizado */}
       <h2 style={{ fontSize: "1.1rem", fontWeight: 500 }}>{message}</h2>
 
-      {/* Video HTML5 */}
       <div
         style={{
           width: "90%",
@@ -69,7 +66,6 @@ export default function VideoPage({
         </video>
       </div>
 
-      {/* Footer */}
       <p style={{ fontSize: "0.8rem", color: "#aaa", marginTop: "1rem" }}>
         © 2025 Frame2Life · Todos los derechos reservados
       </p>
